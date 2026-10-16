@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQA Store</title>
+</head>
+<body>
+  <h1>SQA Store</h1>
+
+  <label for="product">Pilih produk:</label>
+  <select id="product">
+    <option value="Laptop" data-price="7500000">Laptop - Rp7.500.000</option>
+    <option value="Mouse" data-price="150000">Mouse - Rp150.000</option>
+    <option value="Keyboard" data-price="350000">Keyboard - Rp350.000</option>
+  </select>
+
+  <label for="quantity">Jumlah:</label>
+  <input id="quantity" type="number" min="1" value="1">
+
+  <button id="add">Tambah ke Keranjang</button>
+
+  <h2>Keranjang</h2>
+  <ul id="cart"></ul>
+  <p>Total: Rp<span id="total">0</span></p>
+
+  <button id="checkout">Checkout</button>
+  <p id="message" role="status"></p>
+
+  <script>
+    const cart = [];
+    const product = document.querySelector("#product");
+    const quantity = document.querySelector("#quantity");
+    const cartList = document.querySelector("#cart");
+    const totalElement = document.querySelector("#total");
+    const message = document.querySelector("#message");
+
+    document.querySelector("#add").addEventListener("click", () => {
+      const qty = Number(quantity.value);
+
+      if (!Number.isInteger(qty) || qty < 1) {
+        message.textContent = "Jumlah harus bilangan bulat positif";
+        return;
+      }
+
+      const selected = product.selectedOptions[0];
+      const price = Number(selected.dataset.price);
+      const name = selected.value;
+      const existing = cart.find(item => item.name === name);
+
+      if (existing) {
+        existing.quantity += qty;
+      } else {
+        cart.push({ name, price, quantity: qty });
+      }
+
+      renderCart();
+      message.textContent = "Produk berhasil ditambahkan";
+    });
+
+    function renderCart() {
+      cartList.replaceChildren();
+      let total = 0;
+
+      cart.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = `${item.name} x ${item.quantity}`;
+        cartList.appendChild(li);
+        total += item.price * item.quantity;
+      });
+
+      totalElement.textContent = total.toLocaleString("id-ID");
+    }
+
+    document.querySelector("#checkout").addEventListener("click", () => {
+      if (cart.length === 0) {
+        message.textContent = "Keranjang masih kosong";
+        return;
+      }
+
+      message.textContent = "Pesanan berhasil dibuat";
+    });
+  </script>
+</body>
+</html>

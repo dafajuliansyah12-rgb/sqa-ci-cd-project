@@ -8,13 +8,15 @@ on:
     branches: [main]
 
 jobs:
-  unit-test:
-    name: Unit Testing
+  test-and-analysis:
+    name: Unit Test, Coverage, E2E, SonarQube
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -25,8 +27,19 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run Unit Tests
-        run: npm test
-
-      - name: Generate Coverage Report
+      - name: Run Unit Tests and Coverage
         run: npm run test:coverage
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E Tests
+        run: npm run test:e2e
+
+      - name: SonarQube Cloud Analysis
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=true
